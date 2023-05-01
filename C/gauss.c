@@ -5,13 +5,19 @@ void gaussian_elimination(double **matriz, double *result, int tamMatriz);
 
 int main()
 {
-
-    int i, j, tamMatriz;
+    
+    int i, j, tamMatriz, repeat;
     double **matriz, *result;
-
+  repeat = 0;
+  do{
     printf("Entre com o tamanho da matriz: ");
     scanf("%d", &tamMatriz);
-
+    if(tamMatriz <1){
+      repeat = 1;
+    }
+  tamMatriz--;
+  }while(repeat);
+    
     matriz = (double **)malloc(tamMatriz * sizeof(double *));
 
     for (i = 0; i < tamMatriz; i++)
