@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-    matriz, err := lerMatriz("../matrix_300x301.txt")
+    matriz, err := lerMatriz("../matrix_4x5.txt")
 
     if err != nil {
         fmt.Println("Erro ao ler a matriz:", err)

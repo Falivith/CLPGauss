@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::time::Instant;
 
 fn ler_matriz(arquivo_entrada: &str) -> (Vec<Vec<i32>>, usize, usize) {
     let file = File::open(arquivo_entrada).unwrap();
@@ -86,15 +87,21 @@ fn imprimir(matriz: &Vec<Vec<i32>>) {
 }
 
 fn main() {
-    let arquivo_entrada = "../matrix_3.txt";
-
+    println!("\nMatriz original:");
+    let arquivo_entrada = "../matrix_4x5.txt";
+   
     let (mut matriz, linhas, colunas) = ler_matriz(arquivo_entrada);
     println!("\nA matriz tem dimensões {}x{}\n", linhas, colunas);
     // Imprimir matriz original
     println!("\nMatriz original:");
     imprimir(&matriz);
 
+    let start_time = Instant::now(); // iniciar contagem de tempo
     gaussian_elimination(&mut matriz);
+    let elapsed_time = start_time.elapsed(); // parar contagem de tempo
+
+    // Imprimir tempo de execução
+    println!("Tempo de CPU utilizado: {:.2?}", elapsed_time);
 
     // Liberar memória alocada para a matriz (não é necessário em Rust, pois o
     // coletor de lixo cuida disso automaticamente)
