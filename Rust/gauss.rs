@@ -1,105 +1,99 @@
-use std::io::{stdin, stdout, Write};
-use std::mem::size_of;
-use std::process::exit;
-
-fn gaussian_elimination(matriz: &mut Vec<Vec<f64>>, result: &mut Vec<f64>, tam_matriz: usize) {
-    for i in 0..tam_matriz - 1 {
-        for j in i + 1..tam_matriz {
-            let temp = matriz[j][i] / matriz[i][i];
-            for k in i + 1..tam_matriz + 1 {
-                matriz[j][k] -= temp * matriz[i][k];
-            }
-        }
-    }
-
-    for i in (0..tam_matriz).rev() {
-        result[i] = matriz[i][tam_matriz];
-        for j in i + 1..tam_matriz {
-            result[i] -= matriz[i][j] * result[j];
-        }
-        result[i] /= matriz[i][i];
-    }
-}
-
-fn ler_arquivo(arquivo_entrada: &str, num_enderecos: usize) -> Vec<u32> {
-    use std::fs::File;
-    use std::io::Read;
-
-    let mut file = match File::open(arquivo_entrada) {
-        Ok(file) => file,
-        Err(_) => {
-            println!("Erro ao abrir o arquivo.");
-            exit(EXIT_FAILURE);
-        }
-    };
-
-    let mut buf = vec![0u8; size_of::<u32>() * num_enderecos];
-    match file.read_exact(&mut buf) {
-        Ok(_) => (),
-        Err(_) => {
-            println!("Erro ao ler o arquivo.");
-            exit(EXIT_FAILURE);
-        }
-    };
-
-    let mut result = vec![0u32; num_enderecos];
-    result.copy_from_slice(&buf);
-
-    result
-}
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 
 fn main() {
-    let mut tam_matriz = 0;
-    while tam_matriz < 1 {
-        print!("Entre com o tamanho da matriz: ");
-        stdout().flush().unwrap();
+    let arquivo_entrada = "matrix.txt";
+    let (linhas, colunas, matriz) = ler_matriz(arquivo_entrada);
 
-        let mut input = String::new();
-        stdin().read_line(&mut input).unwrap();
+    // Imprimir matriz original
+    println!("\nMatriz original:");
+    imprimir(&matriz, linhas, colunas);
 
-        tam_matriz = match input.trim().parse() {
-            Ok(num) => num,
-            Err(_) => {
-                println!("Entrada inválida, tente novamente.");
-                continue;
-            }
-        };
+    gaussian_elimination(&mut matriz, linhas, colunas);
 
-        if tam_matriz < 1 {
-            println!("O tamanho da matriz deve ser maior ou igual a 1.");
-        }
+    // Liberar memória alocada para a matriz
+    for i in 0..linhas {
+        drop(matriz[i].as_mut());
+    }
+    drop(matriz);
+}
+
+fn ler_matriz(arquivo_entrada: &str) -> (usize, usize, Vec<Vec<i32>>) {
+    let file = File::open(arquivo_entrada).unwrap();
+    let reader = BufReader::new(file);
+    let mut matriz = Vec::new();
+    let (mut linhas, mut colunas) = (0, 0);
+
+    for (i, line) in reader.lines().enumerate() {
+        let line = line.unwrap();
+        let values: Vec<i32> = line
+            .split_whitespace()
+            .map(|s| s.parse().unwrap())
+            .collect();
+        matriz.push(values);
+        linhas += 1;
+        colunas = values.len();
     }
 
-    let mut matriz = vec![vec![0f64; tam_matriz + 1]; tam_matriz];
-    let mut result = vec![0f64; tam_matriz];
+    (linhas, colunas, matriz)
+}
 
-    println!("Entre com os valores da matriz:");
-    for i in 0..tam_matriz {
-        for j in 0..tam_matriz + 1 {
-            print!("[{}][{}]: ", i, j);
-            stdout().flush().unwrap();
+fn gaussian_elimination(matriz: &mut Vec<Vec<i32>>, linhas: usize, colunas: usize) {
+    let mut factor;
 
-            let mut input = String::new();
-            stdin().read_line(&mut input).unwrap();
-
-            let val = match input.trim().parse() {
-                Ok(num) => num,
-                Err(_) => {
-                    println!("Entrada inválida, tente novamente.");
-                    j -= 1;
-                    continue;
+    // Eliminação
+    for i in 0..linhas - 1 {
+        // se o pivo é == 0 ele procura em uma linha != 0
+        if matriz[i][i] == 0 {
+            let mut flag = false;
+            for j in i + 1..linhas {
+                if matriz[j][i] != 0 {
+                    matriz.swap(i, j);
+                    flag = true;
+                    break;
                 }
-            };
+            }
+            if !flag {
+                println!("Não é possível realizar a eliminação de Gauss nessa matriz.");
+                return;
+            }
+        }
 
-            matriz[i][j] = val;
+        // calculos para tornar zero a esquerda do pivo
+        for j in i + 1..linhas {
+            factor = matriz[j][i] as f64 / matriz[i][i] as f64;
+            for k in i..colunas {
+                // realiza as operacoes para zerar, de acordo com a linha a mais, imprimar para conseguir visualizar
+                // println!("\n{} - ({:.2} * {}) = ", matriz[j][k], factor, matriz[i][k]);
+                matriz[j][k] -= (factor * matriz[i][k] as f64) as i32;
+                // println!("{}", matriz[j][k]);
+            }
+            // imprimir(matriz, linhas, colunas);
         }
     }
 
-    gaussian_elimination(&mut matriz, &mut result, tam_matriz);
-
-    println!("O resultado é:");
-    for i in 0..tam_matriz {
-        println!("x{} = {}", i + 1, result[i]);
+    // Checar se a matriz é consistente
+    if matriz[linhas - 1][linhas - 1] == 0 {
+        println!("Não é possível realizar a eliminação de Gauss nessa matriz.");
+        return;
     }
 
-    // limpa a memória alocada para
+    println!("Matriz para a realizacao dos calculos: ");
+    imprimir(matriz, linhas, colunas);
+
+        let mut x = vec![0.0; linhas];
+    // realiza as operacoes do ultimo para o primeiro
+    for i in (0..linhas).rev() {
+        x[i] = matriz[i][colunas - 1] as f64;
+        for j in i + 1..linhas {
+            x[i] -= matriz[i][j] as f64 * x[j];
+        }
+        x[i] /= matriz[i][i] as f64;
+    }
+
+    // Imprime o vetor de soluções
+    println!("\nVetor de solucoes:");
+    for i in 0..linhas {
+        println!("x{} = {}", i + 1, x[i]);
+    }
+}
