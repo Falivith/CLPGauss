@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-    matriz, err := lerMatriz("../matrix_3.txt")
+    matriz, err := lerMatriz("../matrix_300x301.txt")
 
     if err != nil {
         fmt.Println("Erro ao ler a matriz:", err)
@@ -21,6 +21,8 @@ func main() {
     gauss(matriz)
   duracao := time.Since(inicio)
 
+ substituicao_reversa(matriz)
+  
   fmt.Printf("Tempo de execução: %s\n", duracao)
 }
 
@@ -104,7 +106,6 @@ func gauss(matriz [][]float64)(escalonada [][]float64){
             matriz[m][n] += element * matriz[j][n]
           }
         }
-       imprimirMatriz(matriz)
       break;
       } else {
         if(i == nLins - 1){
@@ -116,12 +117,20 @@ func gauss(matriz [][]float64)(escalonada [][]float64){
   return matriz
 }
 
-func substituicao_reversa(matriz [][]float64)(resposta []float64){
-  var vetor []float64
-  nLins := len(matriz)
-  for i := 0; nLins; i++{
-    var x_atual := nLins - 1 - i
-  }
+func substituicao_reversa(matriz [][]float64) []float64 {
+    nLins := len(matriz)
+    resposta := make([]float64, nLins)
 
-  return vetor
+    for i := 0; i < nLins; i++ {
+        d := nLins - 1 - i
+        b := matriz[d][nLins]
+        for j := d + 1; j < nLins; j++ {
+            b -= matriz[d][j] * resposta[j]
+        }
+        xd := b / matriz[d][d]
+        resposta[d] = xd
+        fmt.Printf("x%d = %.3f\n", d+1, xd)
+    }
+
+    return resposta
 }
