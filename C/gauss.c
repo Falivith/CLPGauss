@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <time.h>
 int **lerMatriz(char *arquivoEntrada, int *linhas, int *colunas);
 void gaussian_elimination(int **matriz, int linhas, int colunas);
 void imprimir(int **matriz, int linhas, int colunas);
 int main()
-{
+{  
+    clock_t tempo;
+    srand(time(NULL));
+    tempo = 0;
+    tempo = clock();
     char *arquivoEntrada = "matrix.txt";
 
     int i, linhas = 0, colunas = 0;
@@ -18,7 +22,8 @@ int main()
     imprimir(matriz, linhas, colunas);
 
     gaussian_elimination(matriz, linhas, colunas);
-
+    tempo = clock() - tempo;
+    printf("\nTempo Gasto: %lf \n", ((double)(tempo) / CLOCKS_PER_SEC));
     // Liberar memória alocada para a matriz
     for (i = 0; i < linhas; i++)
     {

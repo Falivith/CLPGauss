@@ -6,21 +6,25 @@ import (
     "os"
     "strconv"
     "strings"
+    "time"
 )
 
 func main() {
-    matriz, err := lerMatriz("../matrix_2.txt")
+    matriz, err := lerMatriz("../matrix_3.txt")
 
     if err != nil {
         fmt.Println("Erro ao ler a matriz:", err)
         os.Exit(1)
     }
 
-  gauss(matriz)
+  inicio := time.Now()
+    gauss(matriz)
+  duracao := time.Since(inicio)
+
+  fmt.Printf("Tempo de execução: %s\n", duracao)
 }
 
 func lerMatriz(arquivo string) ([][]float64, error) {
-
     file, err := os.Open(arquivo)
     if err != nil {
         return nil, err
@@ -33,7 +37,7 @@ func lerMatriz(arquivo string) ([][]float64, error) {
     scanner := bufio.NewScanner(file)
     for scanner.Scan() {
         linha := scanner.Text()
-        numeros := strings.Split(linha, " ")
+        numeros := strings.Fields(linha)
         var linhaMatriz []float64
         for _, numero := range numeros {
             valor, err := strconv.ParseFloat(numero, 64)
@@ -43,10 +47,6 @@ func lerMatriz(arquivo string) ([][]float64, error) {
             linhaMatriz = append(linhaMatriz, valor)
         }
         matriz = append(matriz, linhaMatriz)
-    }
-
-    if err := scanner.Err(); err != nil {
-        return nil, err
     }
 
     return matriz, nil
@@ -116,3 +116,12 @@ func gauss(matriz [][]float64)(escalonada [][]float64){
   return matriz
 }
 
+func substituicao_reversa(matriz [][]float64)(resposta []float64){
+  var vetor []float64
+  nLins := len(matriz)
+  for i := 0; nLins; i++{
+    var x_atual := nLins - 1 - i
+  }
+
+  return vetor
+}

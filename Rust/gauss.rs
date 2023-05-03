@@ -86,7 +86,7 @@ fn imprimir(matriz: &Vec<Vec<i32>>) {
 }
 
 fn main() {
-    let arquivo_entrada = "matrix.txt";
+    let arquivo_entrada = "../matrix_3.txt";
 
     let (mut matriz, linhas, colunas) = ler_matriz(arquivo_entrada);
     println!("\nA matriz tem dimensões {}x{}\n", linhas, colunas);
