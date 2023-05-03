@@ -1,47 +1,31 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
-fn main() {
-    let arquivo_entrada = "matrix.txt";
-    let (linhas, colunas, matriz) = ler_matriz(arquivo_entrada);
-
-    // Imprimir matriz original
-    println!("\nMatriz original:");
-    imprimir(&matriz, linhas, colunas);
-
-    gaussian_elimination(&mut matriz, linhas, colunas);
-
-    // Liberar memória alocada para a matriz
-    for i in 0..linhas {
-        drop(matriz[i].as_mut());
-    }
-    drop(matriz);
-}
-
-fn ler_matriz(arquivo_entrada: &str) -> (usize, usize, Vec<Vec<i32>>) {
+fn ler_matriz(arquivo_entrada: &str) -> (Vec<Vec<i32>>, usize, usize) {
     let file = File::open(arquivo_entrada).unwrap();
     let reader = BufReader::new(file);
-    let mut matriz = Vec::new();
-    let (mut linhas, mut colunas) = (0, 0);
+    let mut linhas = 0;
+    let mut colunas = 0;
+    let mut matriz: Vec<Vec<i32>> = vec![];
 
-    for (i, line) in reader.lines().enumerate() {
+    for line in reader.lines() {
         let line = line.unwrap();
-        let values: Vec<i32> = line
-            .split_whitespace()
-            .map(|s| s.parse().unwrap())
-            .collect();
-        matriz.push(values);
-        linhas += 1;
-        colunas = values.len();
-    }
+        let row: Vec<i32> = line.split(' ').map(|s| s.parse().unwrap()).collect();
 
-    (linhas, colunas, matriz)
+        if colunas == 0 {
+            colunas = row.len();
+        }
+        matriz.push(row);
+        linhas += 1;
+    }
+    (matriz, linhas, colunas)
 }
 
-fn gaussian_elimination(matriz: &mut Vec<Vec<i32>>, linhas: usize, colunas: usize) {
-    let mut factor;
+fn gaussian_elimination(matriz: &mut Vec<Vec<i32>>) {
+    let linhas = matriz.len();
+    let colunas = matriz[0].len();
+    let mut factor: i32;
 
-    // Eliminação
     for i in 0..linhas - 1 {
         // se o pivo é == 0 ele procura em uma linha != 0
         if matriz[i][i] == 0 {
@@ -61,14 +45,10 @@ fn gaussian_elimination(matriz: &mut Vec<Vec<i32>>, linhas: usize, colunas: usiz
 
         // calculos para tornar zero a esquerda do pivo
         for j in i + 1..linhas {
-            factor = matriz[j][i] as f64 / matriz[i][i] as f64;
+            factor = matriz[j][i] / matriz[i][i];
             for k in i..colunas {
-                // realiza as operacoes para zerar, de acordo com a linha a mais, imprimar para conseguir visualizar
-                // println!("\n{} - ({:.2} * {}) = ", matriz[j][k], factor, matriz[i][k]);
-                matriz[j][k] -= (factor * matriz[i][k] as f64) as i32;
-                // println!("{}", matriz[j][k]);
+                matriz[j][k] -= factor * matriz[i][k];
             }
-            // imprimir(matriz, linhas, colunas);
         }
     }
 
@@ -78,22 +58,44 @@ fn gaussian_elimination(matriz: &mut Vec<Vec<i32>>, linhas: usize, colunas: usiz
         return;
     }
 
-    println!("Matriz para a realizacao dos calculos: ");
-    imprimir(matriz, linhas, colunas);
+    println!("Matriz para a realizacao dos calculos:");
+    imprimir(&matriz);
 
-        let mut x = vec![0.0; linhas];
+    let mut x: Vec<i32> = vec![0; linhas];
     // realiza as operacoes do ultimo para o primeiro
+
     for i in (0..linhas).rev() {
-        x[i] = matriz[i][colunas - 1] as f64;
+        x[i] = matriz[i][colunas - 1];
         for j in i + 1..linhas {
-            x[i] -= matriz[i][j] as f64 * x[j];
+            x[i] -= matriz[i][j] * x[j];
         }
-        x[i] /= matriz[i][i] as f64;
+        x[i] /= matriz[i][i];
     }
 
-    // Imprime o vetor de soluções
-    println!("\nVetor de solucoes:");
-    for i in 0..linhas {
-        println!("x{} = {}", i + 1, x[i]);
+    println!("Solução do sistema: {:?}", x);
+}
+
+fn imprimir(matriz: &Vec<Vec<i32>>) {
+    for i in 0..matriz.len() {
+        println!("");
+        for j in 0..matriz[i].len() {
+            print!("{:?} ", matriz[i][j]);
+        }
     }
+    println!("");
+}
+
+fn main() {
+    let arquivo_entrada = "matrix.txt";
+
+    let (mut matriz, linhas, colunas) = ler_matriz(arquivo_entrada);
+    println!("\nA matriz tem dimensões {}x{}\n", linhas, colunas);
+    // Imprimir matriz original
+    println!("\nMatriz original:");
+    imprimir(&matriz);
+
+    gaussian_elimination(&mut matriz);
+
+    // Liberar memória alocada para a matriz (não é necessário em Rust, pois o
+    // coletor de lixo cuida disso automaticamente)
 }
