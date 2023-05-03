@@ -4,7 +4,7 @@ use std::io::{BufRead, BufReader};
 use std::time::Instant;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let matriz = ler_matriz("../matrix_4x5.txt")?;
+    let matriz = ler_matriz("../matrix_300x301.txt")?;
 
     let inicio = Instant::now();
     let matriz_escalonada = gauss(matriz);
